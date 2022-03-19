@@ -58,7 +58,15 @@ class GameOfLife:
         neighbors=0
         xrange = [x-1, x, x+1]
         yrange = [y-1, y, y+1]
-
+        for place in range(3):
+            if xrange[place]==-1:
+                xrange[place]=self.width
+            if xrange[place]>self.width:
+                xrange[place]=0
+            if yrange[place]==-1:
+                yrange[place]=self.height
+            if yrange[place]>self.height:
+                yrange[place]=0
         for x1 in xrange:
             for y1 in yrange:
                 if x1 == x and y1 == y:
@@ -84,8 +92,8 @@ class GameOfLife:
     def canvas_click(self, event):
         if self.pause:
             # Work out where the mouse is in relation to the grid.
-            gridx = math.floor(event.x/self.cell_size)
-            gridy = math.floor(event.y/self.cell_size)
+            gridx = int(event.x/self.cell_size)
+            gridy = int(event.y/self.cell_size)
             # Make that cell alive.
             if self.grid[gridx][gridy] == 1:
                 self.grid[gridx][gridy] = 0
@@ -96,5 +104,4 @@ class GameOfLife:
         self.pause=not self.pause
         if not self.pause:
             self.run_game()
-#celulle --> widgets --> liste --> matrice --> celulle --> vivante (color noire)/morte(color blanche)
 GameOfLife()
