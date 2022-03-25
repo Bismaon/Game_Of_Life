@@ -1,6 +1,4 @@
 from tkinter import Tk, Canvas
-import math
-from random import randint
 class GameOfLife:
     def __init__(self):
         self.window=Tk()
@@ -17,12 +15,15 @@ class GameOfLife:
         self.canvas = Canvas(self.window, width=self.width*self.cell_size, height=self.height*self.cell_size,  bg='white')
         self.canvas.pack()
         # Set up an empty game grid.
-        self.grid = [[0 for x in range(self.height)] for x in range(self.width)]
+        self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
         # Set a click event on the canvas.
-        self.window.bind('<Button-1>', self.canvas_click)
-        self.window.bind('<Button1-Motion>', self.canvas_click)
+        self.window.bind('<Button-1>', self.canvas_click_alive)
+        self.window.bind('<Button1-Motion>', self.canvas_click_alive)
         self.window.bind("<Return>", self.pause_game)
+        self.window.bind("<Button-2>", self.canvas_click_dead)
+        self.window.bind("<Button2-Motion>", self.canvas_click_dead)
+        self.window.bind("<BackSpace>", self.reset_game)
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
@@ -30,50 +31,50 @@ class GameOfLife:
     def draw_board(self):
         for row in range(self.height):
             for column in range(self.width):
-                pos_x=row*self.cell_size
-                pos_y=column*self.cell_size
+                pos_y=row*self.cell_size
+                pos_x=column*self.cell_size
                 if self.grid[row][column]==1:
-                    self.canvas.create_rectangle(pos_x, pos_y, pos_x+self.cell_size,
-                                                 pos_y+self.cell_size, fill='black', outline='black')
+                    self.canvas.create_rectangle(pos_y, pos_x, pos_y+self.cell_size,
+                                                 pos_x+self.cell_size, fill='black', outline='black')
 
     def run_game(self):
-        new_board= [[0 for x in range(self.height)] for x in range(self.width)]
+        new_board= [[0 for column in range(self.width)] for row in range(self.height)]
         if not self.pause:
-            for x in range(self.height):
-                for y in range(self.width):
-                    nb_neighbors=self.number_of_neighbors(x, y)
-                    if self.grid[x][y] == 1:
+            for row in range(self.height):
+                for column in range(self.width):
+                    nb_neighbors=self.number_of_neighbors(row, column)
+                    if self.grid[row][column] == 1:
                         if nb_neighbors<2 or nb_neighbors>3:
-                            new_board[x][y]=0
+                            new_board[row][column]=0
                         if (nb_neighbors==2 or nb_neighbors==3):
-                            new_board[x][y]=1
+                            new_board[row][column]=1
                     else:
                         if nb_neighbors==3:
-                            new_board[x][y]=1
+                            new_board[row][column]=1
             return new_board
         else:
             return self.grid
 
-    def number_of_neighbors(self, x, y):
+    def number_of_neighbors(self, y, x):
         neighbors=0
         xrange = [x-1, x, x+1]
         yrange = [y-1, y, y+1]
         for place in range(3):
-            if xrange[place]==-1:
-                xrange[place]=self.width
+            if xrange[place]<0:
+                xrange[place]=xrange[place]+self.width
             if xrange[place]>self.width:
-                xrange[place]=0
-            if yrange[place]==-1:
-                yrange[place]=self.height
+                xrange[place]=xrange[place]-self.width
+            if yrange[place]<0:
+                yrange[place]=yrange[place]+self.height
             if yrange[place]>self.height:
-                yrange[place]=0
+                yrange[place]=yrange[place]-self.height
         for x1 in xrange:
             for y1 in yrange:
                 if x1 == x and y1 == y:
                     # Don't count this cell.
                     continue
                 try:
-                    if self.grid[x1][y1] == 1:
+                    if self.grid[y1][x1] == 1:
                         neighbors += 1
                 except IndexError:
                     continue
@@ -89,19 +90,28 @@ class GameOfLife:
         # Set the next tick in the timer.
         self.window.after(10, self.update_board)
 
-    def canvas_click(self, event):
+    def canvas_click_alive(self, event):
         if self.pause:
             # Work out where the mouse is in relation to the grid.
             gridx = int(event.x/self.cell_size)
             gridy = int(event.y/self.cell_size)
-            # Make that cell alive.
-            if self.grid[gridx][gridy] == 1:
-                self.grid[gridx][gridy] = 0
-            else:
-                self.grid[gridx][gridy] = 1
+            self.grid[gridx][gridy] = 1
 
-    def pause_game(self, event):
+    def canvas_click_dead(self, event):
+        if self.pause:
+            # Work out where the mouse is in relation to the grid.
+            gridx = int(event.x/self.cell_size)
+            gridy = int(event.y/self.cell_size)
+            self.grid[gridx][gridy] = 0
+
+    def pause_game(self, event=None):
         self.pause=not self.pause
         if not self.pause:
             self.run_game()
+    def reset_game(self, event=None):
+        self.canvas.delete('all')
+        if not self.pause:
+            self.pause_game()
+        self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
+        self.draw_board()
 GameOfLife()
