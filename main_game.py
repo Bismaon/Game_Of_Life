@@ -2,12 +2,13 @@ from tkinter import Tk, Canvas
 class GameOfLife:
     def __init__(self):
         self.window=Tk()
-        self.window.title("Game of Life")
         self.window.resizable(False, False)
         self.width=90
         self.height=90
         self.pause=True
+        self.window.wm_title("Game of Life | paused")
         self.cell_size=10
+        self.delay=10
         # Set up the size of the canvas.
         self.window.geometry(str(self.width*self.cell_size) + "x" + str(self.height*self.cell_size))
 
@@ -21,9 +22,11 @@ class GameOfLife:
         self.window.bind('<Button-1>', self.canvas_click_alive)
         self.window.bind('<Button1-Motion>', self.canvas_click_alive)
         self.window.bind("<Return>", self.pause_game)
-        self.window.bind("<Button-2>", self.canvas_click_dead)
-        self.window.bind("<Button2-Motion>", self.canvas_click_dead)
+        self.window.bind("<Button-3>", self.canvas_click_dead)
+        self.window.bind("<Button3-Motion>", self.canvas_click_dead)
         self.window.bind("<BackSpace>", self.reset_game)
+        self.window.bind("[", self.slow_game)
+        self.window.bind("]", self.fast_game)
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
@@ -88,7 +91,7 @@ class GameOfLife:
         # Generate the game board with the current population.
         self.draw_board()
         # Set the next tick in the timer.
-        self.window.after(10, self.update_board)
+        self.window.after(self.delay, self.update_board)
 
     def canvas_click_alive(self, event):
         if self.pause:
@@ -108,10 +111,25 @@ class GameOfLife:
         self.pause=not self.pause
         if not self.pause:
             self.run_game()
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
+        else:
+            self.window.wm_title("Game of Life | paused")
+
     def reset_game(self, event=None):
         self.canvas.delete('all')
         if not self.pause:
             self.pause_game()
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
+
+    def slow_game(self, event=None):
+        if self.delay>1:
+            self.delay-=1
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
+
+    def fast_game(self, event=None):
+        if self.delay<100:
+            self.delay+=1
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
+
 GameOfLife()
