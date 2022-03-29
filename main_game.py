@@ -6,7 +6,7 @@ class GameOfLife:
         self.height=90
         self.pause=True
         self.window.title(f"Game of Life | paused | 10")
-        self.cell_size=10
+        self.cell_size=5
         self.delay=10
         # Set up the size of the canvas.
         self.window.geometry(f"{self.width*self.cell_size}x{self.height*self.cell_size}")
