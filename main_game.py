@@ -65,11 +65,11 @@ class GameOfLife:
         for place in range(3):
             if xrange[place]<0:
                 xrange[place]=xrange[place]+self.width
-            if xrange[place]>self.width:
+            if xrange[place]>(self.width-1):
                 xrange[place]=xrange[place]-self.width
             if yrange[place]<0:
                 yrange[place]=yrange[place]+self.height
-            if yrange[place]>self.height:
+            if yrange[place]>(self.height-1):
                 yrange[place]=yrange[place]-self.height
         for x1 in xrange:
             for y1 in yrange:
@@ -132,4 +132,18 @@ class GameOfLife:
             self.delay+=1
             self.window.wm_title(f"Game of Life | running | {self.delay}")
 
+    def select_template(self, index):
+        templates={1:[],
+                   2:[],
+                   3:[],
+                   4:[],
+                   5:[],
+                   6:[],
+                   7:[],
+                   8:[],
+                   9:[],
+                   10:[]}
+        if not self.pause:
+            self.pause_game()
+        
 GameOfLife()
