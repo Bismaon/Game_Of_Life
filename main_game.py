@@ -2,19 +2,19 @@ from tkinter import Tk, Canvas
 class GameOfLife:
     def __init__(self):
         self.window=Tk()
-        self.window.resizable(False, False)
         self.width=90
         self.height=90
         self.pause=True
-        self.window.wm_title("Game of Life | paused")
+        self.window.title(f"Game of Life | paused | 10")
         self.cell_size=10
         self.delay=10
         # Set up the size of the canvas.
-        self.window.geometry(str(self.width*self.cell_size) + "x" + str(self.height*self.cell_size))
+        self.window.geometry(f"{self.width*self.cell_size}x{self.height*self.cell_size}")
 
         # Create the canvas widget and add it to the Tkinter application window.
-        self.canvas = Canvas(self.window, width=self.width*self.cell_size, height=self.height*self.cell_size,  bg='white')
-        self.canvas.pack()
+        self.canvas = Canvas(self.window, width=self.width*self.cell_size,
+                             height=self.height*self.cell_size, bg='white')
+        self.canvas.grid(row=0, column=0)
         # Set up an empty game grid.
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
@@ -113,7 +113,7 @@ class GameOfLife:
             self.run_game()
             self.window.wm_title(f"Game of Life | running | {self.delay}")
         else:
-            self.window.wm_title("Game of Life | paused")
+            self.window.wm_title(f"Game of Life | paused | {self.delay}")
 
     def reset_game(self, event=None):
         self.canvas.delete('all')
@@ -132,18 +132,4 @@ class GameOfLife:
             self.delay+=1
             self.window.wm_title(f"Game of Life | running | {self.delay}")
 
-    def select_template(self, index):
-        templates={1:[],
-                   2:[],
-                   3:[],
-                   4:[],
-                   5:[],
-                   6:[],
-                   7:[],
-                   8:[],
-                   9:[],
-                   10:[]}
-        if not self.pause:
-            self.pause_game()
-        
 GameOfLife()
