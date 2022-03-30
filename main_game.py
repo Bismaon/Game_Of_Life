@@ -1,35 +1,42 @@
 from tkinter import Tk, Canvas, Button
 from random import randint
 class GameOfLife:
+    """GameOfLife is a Tkinter application displaying a canvas on which you can
+    put cells to life or death, and run in which case the rules of GOL will apply
+    and you will see how your simulation goes.
+    """
     def __init__(self):
         self.window=Tk()
-        self.width=190
-        self.height=90
+        self.width=100
+        self.height=100
         self.pause=True
-        self.window.title(f"Game of Life | paused | 10")
+        self.window.title("Game of Life | paused | 10")
         self.cell_size=5
         self.delay=10
         # Set up the size of the canvas.
-        self.window.geometry("1900x1000")
+        self.window.geometry("1000x500")
 
         # Create the canvas widget and add it to the Tkinter application window.
         self.canvas = Canvas(self.window, width=self.width*self.cell_size,
                              height=self.height*self.cell_size, bg='white')
         self.canvas.grid(row=0, column=0)
+
         # Set up an empty game grid.
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
+
         # Set a click event on the canvas.
-        self.window.bind('<Button-1>', self.canvas_click_alive)
-        self.window.bind('<Button1-Motion>', self.canvas_click_alive)
-        self.window.bind("<Return>", self.pause_game)
-        self.window.bind("<Button-3>", self.canvas_click_dead)
-        self.window.bind("<Button3-Motion>", self.canvas_click_dead)
-        self.window.bind("<BackSpace>", self.reset_game)
-        self.window.bind("[", self.slow_game)
-        self.window.bind("]", self.fast_game)
-        self.B_randompat=Button(self.window, text="Pattern aléatoire",
+        self.window.bind('<Button-1>',      self.canvas_click_alive)
+        self.window.bind('<Button1-Motion>',self.canvas_click_alive)
+        self.window.bind("<Return>",        self.pause_game)
+        self.window.bind("<Button-3>",      self.canvas_click_dead)
+        self.window.bind("<Button3-Motion>",self.canvas_click_dead)
+        self.window.bind("<BackSpace>",     self.reset_game)
+        self.window.bind("[",               self.slow_game)
+        self.window.bind("]",               self.fast_game)
+        self.b_randompat=Button(self.window, text="Pattern aléatoire",
                                 font="Arial 12", command=self.create_random_pattern)
-        self.B_randompat.grid(row=1, column=0)
+        self.b_randompat.grid(row=1, column=0)
+
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
@@ -40,8 +47,10 @@ class GameOfLife:
                 pos_y=row*self.cell_size
                 pos_x=column*self.cell_size
                 if self.grid[row][column]==1:
-                    self.canvas.create_rectangle(pos_y, pos_x, pos_y+self.cell_size,
-                                                 pos_x+self.cell_size, fill='black', outline='black')
+                    self.canvas.create_rectangle(pos_y, pos_x,
+                                                 pos_y+self.cell_size,
+                                                 pos_x+self.cell_size,
+                                                 fill='black', outline='black')
 
     def run_game(self):
         new_board= [[0 for column in range(self.width)] for row in range(self.height)]
@@ -50,7 +59,7 @@ class GameOfLife:
                 for column in range(self.width):
                     nb_neighbors=self.number_of_neighbors(row, column)
                     if self.grid[row][column] == 1:
-                        if nb_neighbors<2 or nb_neighbors>3:
+                        if nb_neighbors in (2, 3):
                             new_board[row][column]=0
                         if (nb_neighbors==2 or nb_neighbors==3):
                             new_board[row][column]=1
@@ -58,13 +67,12 @@ class GameOfLife:
                         if nb_neighbors==3:
                             new_board[row][column]=1
             return new_board
-        else:
-            return self.grid
+        return self.grid
 
-    def number_of_neighbors(self, y, x):
+    def number_of_neighbors(self, row, column):
         neighbors=0
-        xrange = [x-1, x, x+1]
-        yrange = [y-1, y, y+1]
+        xrange = [column-1, column, column+1]
+        yrange = [row-1, row, row+1]
         for place in range(3):
             if xrange[place]<0:
                 xrange[place]=xrange[place]+self.width
@@ -74,13 +82,13 @@ class GameOfLife:
                 yrange[place]=yrange[place]+self.height
             if yrange[place]>(self.height-1):
                 yrange[place]=yrange[place]-self.height
-        for x1 in xrange:
-            for y1 in yrange:
-                if x1 == x and y1 == y:
+        for column_1 in xrange:
+            for row_1 in yrange:
+                if column_1 == column and row_1 == row:
                     # Don't count this cell.
                     continue
                 try:
-                    if self.grid[y1][x1] == 1:
+                    if self.grid[row_1][column_1] == 1:
                         neighbors += 1
                 except IndexError:
                     continue
@@ -137,7 +145,9 @@ class GameOfLife:
             self.window.wm_title(f"Game of Life | running | {self.delay}")
 
     def create_random_pattern(self, event=None):
-        self.grid= [[randint(0,1) for column in range(self.width)] for row in range(self.height)]
+        self.grid= [[1 if (randint(1, self.cell_size)==self.cell_size)
+                     else 0 for column in range(self.width)]
+                    for row in range(self.height)]
         if not self.pause:
             self.pause_game()
         self.draw_board()
