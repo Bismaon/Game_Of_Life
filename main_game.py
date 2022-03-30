@@ -1,15 +1,16 @@
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, Button
+from random import randint
 class GameOfLife:
     def __init__(self):
         self.window=Tk()
-        self.width=90
+        self.width=190
         self.height=90
         self.pause=True
         self.window.title(f"Game of Life | paused | 10")
         self.cell_size=5
         self.delay=10
         # Set up the size of the canvas.
-        self.window.geometry(f"{self.width*self.cell_size}x{self.height*self.cell_size}")
+        self.window.geometry("1900x1000")
 
         # Create the canvas widget and add it to the Tkinter application window.
         self.canvas = Canvas(self.window, width=self.width*self.cell_size,
@@ -17,7 +18,6 @@ class GameOfLife:
         self.canvas.grid(row=0, column=0)
         # Set up an empty game grid.
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
-        self.draw_board()
         # Set a click event on the canvas.
         self.window.bind('<Button-1>', self.canvas_click_alive)
         self.window.bind('<Button1-Motion>', self.canvas_click_alive)
@@ -27,6 +27,9 @@ class GameOfLife:
         self.window.bind("<BackSpace>", self.reset_game)
         self.window.bind("[", self.slow_game)
         self.window.bind("]", self.fast_game)
+        self.B_randompat=Button(self.window, text="Pattern aléatoire",
+                                font="Arial 12", command=self.create_random_pattern)
+        self.B_randompat.grid(row=1, column=0)
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
@@ -96,17 +99,18 @@ class GameOfLife:
     def canvas_click_alive(self, event):
         if self.pause:
             # Work out where the mouse is in relation to the grid.
-            gridx = int(event.x/self.cell_size)
-            gridy = int(event.y/self.cell_size)
-            self.grid[gridx][gridy] = 1
+            gridx = int(event.y/self.cell_size)
+            gridy = int(event.x/self.cell_size)
+            self.grid[gridy][gridx] = 1
+            self.draw_board()
 
     def canvas_click_dead(self, event):
         if self.pause:
             # Work out where the mouse is in relation to the grid.
-            gridx = int(event.x/self.cell_size)
-            gridy = int(event.y/self.cell_size)
-            self.grid[gridx][gridy] = 0
-
+            gridx = int(event.y/self.cell_size)
+            gridy = int(event.x/self.cell_size)
+            self.grid[gridy][gridx] = 0
+            self.draw_board()
     def pause_game(self, event=None):
         self.pause=not self.pause
         if not self.pause:
@@ -132,4 +136,9 @@ class GameOfLife:
             self.delay+=1
             self.window.wm_title(f"Game of Life | running | {self.delay}")
 
+    def create_random_pattern(self, event=None):
+        self.grid= [[randint(0,1) for column in range(self.width)] for row in range(self.height)]
+        if not self.pause:
+            self.pause_game()
+        self.draw_board()
 GameOfLife()
