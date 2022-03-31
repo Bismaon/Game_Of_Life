@@ -7,12 +7,13 @@ class GameOfLife:
     """
     def __init__(self):
         self.window=Tk()
-        self.width=100
-        self.height=100
+        self.width=110
+        self.height=110
         self.pause=True
         self.window.title("Game of Life | paused | 10")
         self.cell_size=5
         self.delay=10
+        self.generation=0
         # Set up the size of the canvas.
         self.window.geometry("1000x500")
 
@@ -61,7 +62,7 @@ class GameOfLife:
                     if self.grid[row][column] == 1:
                         if nb_neighbors in (2, 3):
                             new_board[row][column]=0
-                        if (nb_neighbors==2 or nb_neighbors==3):
+                        if nb_neighbors in (2, 3):
                             new_board[row][column]=1
                     else:
                         if nb_neighbors==3:
@@ -101,6 +102,10 @@ class GameOfLife:
         self.grid = self.run_game()
         # Generate the game board with the current population.
         self.draw_board()
+
+        if not self.pause:
+            self.generation+=1
+            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
         # Set the next tick in the timer.
         self.window.after(self.delay, self.update_board)
 
@@ -133,16 +138,18 @@ class GameOfLife:
             self.pause_game()
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
+        self.window.wm_title(f"Game of Life | paused | {self.delay}")
+        self.generation=0
 
     def slow_game(self, event=None):
         if self.delay>1:
             self.delay-=1
-            self.window.wm_title(f"Game of Life | running | {self.delay}")
+            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
 
     def fast_game(self, event=None):
         if self.delay<100:
             self.delay+=1
-            self.window.wm_title(f"Game of Life | running | {self.delay}")
+            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
 
     def create_random_pattern(self, event=None):
         self.grid= [[1 if (randint(1, self.cell_size)==self.cell_size)
