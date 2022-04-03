@@ -1,4 +1,4 @@
-from tkinter import Tk, Canvas, Button
+from tkinter import Tk, Canvas, Button, Label
 from random import randint
 class GameOfLife:
     """GameOfLife is a Tkinter application displaying a canvas on which you can
@@ -37,7 +37,8 @@ class GameOfLife:
         self.b_randompat=Button(self.window, text="Pattern aléatoire",
                                 font="Arial 12", command=self.create_random_pattern)
         self.b_randompat.grid(row=1, column=0)
-
+        self.l_generation=Label(self.window, font="Arial 12",text=f"Génération: {self.generation}")
+        self.l_generation.grid(row=1, column=1)
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
@@ -88,11 +89,8 @@ class GameOfLife:
                 if column_1 == column and row_1 == row:
                     # Don't count this cell.
                     continue
-                try:
-                    if self.grid[row_1][column_1] == 1:
-                        neighbors += 1
-                except IndexError:
-                    continue
+                elif self.grid[row_1][column_1] == 1:
+                    neighbors += 1
         return neighbors
 
     def update_board(self):
@@ -105,7 +103,8 @@ class GameOfLife:
 
         if not self.pause:
             self.generation+=1
-            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
+            self.l_generation['text']=f"Génération: {self.generation}"
         # Set the next tick in the timer.
         self.window.after(self.delay, self.update_board)
 
@@ -124,6 +123,7 @@ class GameOfLife:
             gridy = int(event.x/self.cell_size)
             self.grid[gridy][gridx] = 0
             self.draw_board()
+
     def pause_game(self, event=None):
         self.pause=not self.pause
         if not self.pause:
@@ -139,17 +139,18 @@ class GameOfLife:
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
         self.window.wm_title(f"Game of Life | paused | {self.delay}")
+        self.l_generation['text']=f"Génération: {self.generation}"
         self.generation=0
 
     def slow_game(self, event=None):
-        if self.delay>1:
+        if self.delay>6:
             self.delay-=1
-            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
 
     def fast_game(self, event=None):
         if self.delay<100:
             self.delay+=1
-            self.window.wm_title(f"Game of Life | running | {self.delay} | {self.generation}")
+            self.window.wm_title(f"Game of Life | running | {self.delay}")
 
     def create_random_pattern(self, event=None):
         self.grid= [[1 if (randint(1, self.cell_size)==self.cell_size)
@@ -158,4 +159,10 @@ class GameOfLife:
         if not self.pause:
             self.pause_game()
         self.draw_board()
-GameOfLife()
+
+
+def main():
+    GameOfLife()
+
+if __name__ == '__main__':
+    main()
