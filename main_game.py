@@ -1,26 +1,32 @@
 from tkinter import Tk, Canvas, Button, Label
 from random import randint
 class GameOfLife:
-    """GameOfLife is a Tkinter application displaying a canvas on which you can
-    put cells to life or death, and run in which case the rules of GOL will apply
-    and you will see how your simulation goes.
+    """
+    The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells,
+    each of which is in one of two possible states, live or dead (or populated and unpopulated, respectively).
+    Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically,
+    or diagonally adjacent.
     """
     def __init__(self):
         self.window=Tk()
-        self.width=110
-        self.height=110
+        self.width=120
+        self.height=120
         self.pause=True
         self.window.title("Game of Life | paused | 10")
         self.cell_size=5
         self.delay=10
         self.generation=0
+        for i in range(10):
+            self.window.grid_rowconfigure(i,weight=1)
+            self.window.grid_columnconfigure(i,weight=1)
         # Set up the size of the canvas.
-        self.window.geometry("1000x500")
+        #self.window.geometry("1000x500")
 
         # Create the canvas widget and add it to the Tkinter application window.
         self.canvas = Canvas(self.window, width=self.width*self.cell_size,
-                             height=self.height*self.cell_size, bg='white')
-        self.canvas.grid(row=0, column=0)
+                             height=self.height*self.cell_size, bg='white',
+                             highlightthickness=1, highlightbackground="black")
+        self.canvas.grid(row=0, column=5)
 
         # Set up an empty game grid.
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
@@ -36,14 +42,16 @@ class GameOfLife:
         self.window.bind("]",               self.fast_game)
         self.b_randompat=Button(self.window, text="Pattern aléatoire",
                                 font="Arial 12", command=self.create_random_pattern)
-        self.b_randompat.grid(row=1, column=0)
+        self.b_randompat.grid(row=0, column=6)
         self.l_generation=Label(self.window, font="Arial 12",text=f"Génération: {self.generation}")
-        self.l_generation.grid(row=1, column=1)
+        self.l_generation.grid(row=1, column=5)
         # Start the timer.
         self.window.after(10, self.update_board)
         self.window.mainloop()
 
     def draw_board(self):
+        """create all the cells on the canvas
+        """
         for row in range(self.height):
             for column in range(self.width):
                 pos_y=row*self.cell_size
@@ -55,6 +63,11 @@ class GameOfLife:
                                                  fill='black', outline='black')
 
     def run_game(self):
+        """checks the whole grid to see if a cell should die or be alive
+
+        Returns:
+            list: the grid of the cells indicating their state (alive or dead)
+        """
         new_board= [[0 for column in range(self.width)] for row in range(self.height)]
         if not self.pause:
             for row in range(self.height):
@@ -72,6 +85,15 @@ class GameOfLife:
         return self.grid
 
     def number_of_neighbors(self, row, column):
+        """counts the number of neighbors of one given cell
+
+        Args:
+            row (int): y axis of the grid
+            column (int): x axis of the grid
+
+        Returns:
+            _type_: _description_
+        """
         neighbors=0
         xrange = [column-1, column, column+1]
         yrange = [row-1, row, row+1]
@@ -94,6 +116,8 @@ class GameOfLife:
         return neighbors
 
     def update_board(self):
+        """Updates the canvas periodically every self.delay miliseconds
+        """
         # Clear the canvas.
         self.canvas.delete("all")
         # Run the next generation and update the game grid.
@@ -109,18 +133,36 @@ class GameOfLife:
         self.window.after(self.delay, self.update_board)
 
     def canvas_click_alive(self, event):
+        """adds an alive cell to the canvas where the mouse clicks.
+
+        Args:
+            event (right mouse click)
+        """
         if self.pause:
             # Work out where the mouse is in relation to the grid.
             gridx = int(event.y/self.cell_size)
             gridy = int(event.x/self.cell_size)
+            if gridx>self.width-1: #checking if it is within the canvas x axis bound
+                gridx-=self.width
+            if gridy>self.height-1: #checking if it is within the canvas y axis bound
+                gridy-=self.height
             self.grid[gridy][gridx] = 1
             self.draw_board()
 
     def canvas_click_dead(self, event):
+        """kills a cell to the canvas where the mouse clicks.
+
+        Args:
+            event (left mouse click)
+        """
         if self.pause:
             # Work out where the mouse is in relation to the grid.
             gridx = int(event.y/self.cell_size)
             gridy = int(event.x/self.cell_size)
+            if gridx>self.width-1: #checking if it is within the canvas x axis bound
+                gridx-=self.width
+            if gridy>self.height-1: #checking if it is within the canvas y axis bound
+                gridy-=self.height
             self.grid[gridy][gridx] = 0
             self.draw_board()
 
@@ -139,8 +181,8 @@ class GameOfLife:
         self.grid = [[0 for column in range(self.width)] for row in range(self.height)]
         self.draw_board()
         self.window.wm_title(f"Game of Life | paused | {self.delay}")
-        self.l_generation['text']=f"Génération: {self.generation}"
         self.generation=0
+        self.l_generation['text']=f"Génération: {self.generation}"
 
     def slow_game(self, event=None):
         if self.delay>6:
